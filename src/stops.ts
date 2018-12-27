@@ -9,7 +9,13 @@ interface StopJSON {
     Produkte: string
 }
 
-class Stop {
+export class Stop {
+  Haltestellenname: string
+  VAGKennung : string
+  VGNKennung: number
+  Longitude: number
+  Latitude: number
+  Produkte: string
 
   constructor(
     Haltestellenname: string,
@@ -18,7 +24,14 @@ class Stop {
     Longitude: number,
     Latitude: number,
     Produkte: string
-  ) {}
+  ) {
+    this.Haltestellenname = Haltestellenname
+    this.VAGKennung = VAGKennung 
+    this.VGNKennung = VGNKennung 
+    this.Longitude = Longitude
+    this.Latitude = Latitude
+    this.Produkte = Produkte
+  }
 
   getName(): string {
     return this.Haltestellenname;
@@ -52,25 +65,34 @@ class Stop {
   // reviver can be passed as the second parameter to JSON.parse
   // to automatically call Stop.fromJSON on the resulting value.
   static reviver(key: string, value: any): any {
-    return key === "" ? User.fromJSON(value) : value;
+    return key === "" ? Stop.fromJSON(value) : value;
   }
 }
 
 
 
 interface StopRequestJSON {
-    Version: string
-    Timestamp: string
+    Metadata: {
+      Version: string,
+      Timestamp: string
+    }
     Haltestellen: Stop[]
 }
-
-class StopRequest {
+interface Metadata {
+  Version: string,
+  Timestamp: string
+}
+export class StopRequest {
+    Metadata: Metadata
+    Haltestellen: Stop[]
 
   constructor(
-    Version: string,
-    Timestamp: string,
+    Metadata: Metadata,
     Haltestellen: Stop[]
-  ) {}
+  ) {
+    this.Metadata = Metadata
+    this.Haltestellen = Haltestellen
+  }
 
   getStops(): Stop[] {
     return this.Haltestellen;
@@ -78,12 +100,12 @@ class StopRequest {
 
   // fromJSON is used to convert an serialized version
   // of the Stop to an instance of the class
-  static fromJSON(json: StopJSON|string): Stop {
+  static fromJSON(json: StopRequestJSON|string): StopRequest {
     if (typeof json === 'string') {
       // if it's a string, parse it first
       return JSON.parse(json, StopRequest.reviver);
     } else {
-      // create an instance of the Stop class
+      // create an instance of the StopRequest class
       let stop = Object.create(StopRequest.prototype);
       // copy all the fields from the json object
       return Object.assign(stop, json, {

@@ -1,67 +1,86 @@
 import axios, {
   AxiosRequestConfig,
   AxiosResponse,
-  AxiosError,
-  // AxiosInstance,
-  // AxiosAdapter,
-  // Cancel,
-  // CancelToken,
-  // CancelTokenSource,
-  // Canceler
+  AxiosError
 } from 'axios';
-import * as url from 'url';
 
-// axios.get('/user?ID=12345');
-
-export class API {
-  private endPointBase: string 
-  Network : Networks 
-  
-  constructor(){
-    this.endPointBase = "https://start.vag.de/dm/api"
-    this.Network = Networks.VGN
-  }
-  
-  getNetworkPath (path:string) : string {
-    return '/' + Networks[this.Network] + '/' + path
-  }
-
-}
-
-
-class StopRequest extends API {
-  private path = 'abfahrten.json'
-  
-  constructor(){
-    super()
-  }
-  
-  static findByName(name:string) : Promise<Stop|null> {
-    let url = getNetworkPath(this.path) + "/" + name
-    const axiosRequestConfig : AxiosRequestConfig = {
-      url: url,
-      baseUrl: this.endPointBase,
-      method: 'get'
-      //params: { id: 12345 }
-    }
-    
-    const handleResponse = (response: AxiosResponse) : Stop | null => {
-      
-    }
-    
-    return new Promise((resolve, reject) =>{
-      axios(axiosRequestConfig)
-        .then(response => resolve(handleResponse))
-        .catch(error => reject(error))
-    })
-  }
-  
-  
-}
-
+import {StopRequest,Stop} from './stops'
 
 enum Networks { 
   VAG, 
   VGN
 }
 
+interface RequestParams{
+  name?: string
+  lon?: number
+  lat?: number
+  distance?: number
+}
+
+export class StopEndpoint  {
+  static readonly path : string = 'haltestellen.json'
+  
+  private static handleResponse(response: AxiosResponse) : Stop[] | undefined {
+    if (!response.data) {
+      console.log('Returning undefined')
+      return undefined
+    } else {
+      let haltestellenRequest = StopRequest.fromJSON(response.data)
+      let haltestellen = haltestellenRequest.Haltestellen
+      return haltestellen
+    }
+  }
+
+  private static requestAPI(axiosRequestConfig: AxiosRequestConfig) :  Promise<Stop[]|null> {
+    return new Promise((resolve : (value?: Stop[] | undefined)=>void, reject: (reason?:any)=> void) : void=>{
+      axios(axiosRequestConfig)
+        .then(response => {resolve(StopEndpoint.handleResponse(response));})
+        .catch(error => reject(error))
+    })
+  }
+
+ 
+  static findByLocation(lat: number, lon: number, radius?:number): Promise<Stop[]|null>{
+    let params : RequestParams = {
+      lon: lon,
+      lat: lat
+    }
+    if (radius) {
+      params.distance = radius
+    } 
+
+    const axiosRequestConfig : AxiosRequestConfig = API.axiosRequestConfig(params,this.path)
+
+    return StopEndpoint.requestAPI(axiosRequestConfig)
+  } 
+
+  static findByName(name:string) : Promise<Stop[]|null> {
+    
+    const axiosRequestConfig : AxiosRequestConfig = API.axiosRequestConfig({name:name},this.path)
+
+    return StopEndpoint.requestAPI(axiosRequestConfig)
+  }
+  
+  
+}
+
+export class API {
+  static endPointBase: string =  "https://start.vag.de/dm/api"
+  static Network : Networks = Networks.VGN
+  static Stops : StopEndpoint = StopEndpoint 
+  constructor(){}
+  
+  static axiosRequestConfig  = (params:RequestParams, path:string) : AxiosRequestConfig => {
+    return {  
+    params: params,
+      url: API.getNetworkPath(path),
+      baseURL: API.endPointBase,
+      method: 'get'
+    }
+  }
+
+  static getNetworkPath (path:string) : string {
+    return  '/' + path + '/' + Networks[API.Network] 
+  }
+}
