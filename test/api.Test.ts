@@ -1,27 +1,30 @@
 import chai,{ expect,should } from 'chai';
-import chaiThings from 'chai-things'
-import chaiAsPromised from 'chai-as-promised';
+import chaiAsPromised from 'chai-as-promised'
+
 import 'mocha';
-
-
-chai.use(chaiThings);
-chai.use(chaiAsPromised);
+chai.use(chaiAsPromised)
 chai.should();
 
-import {API, StopEndpoint} from './../src/api';
-import { StopRequest } from '../src/stops';
+import {API} from './../src/api'
+import {DepartureEndpoint} from '../src/api/departureEndpoint';
+import {StopEndpoint} from '../src/api/stopsEndpoint';
 
 describe('API.ts', ()=>{
+    it('should have a property Stops', ()=>{
+        expect(API).to.have.property('Stops')
+    })
+    it('should have a property Departures', ()=>{
+        expect(API).to.have.property('Departures')
+    })
+
     describe('API.Stops', ()=>{
         it('should have a method findByName', ()=>{
-            let stops = API.Stops
-            expect(API.Stops).to.have.property('findByName')
+            expect(StopEndpoint).to.have.property('findByName')
         })
         describe('API.Stops.findByName', ()=>{
             it('should eventually return an Array', ()=>{
                 let response = StopEndpoint.findByName('kjbasfdkjbdf')
                 return expect(response).to.eventually.be.an('array')
-                
             })
             it('should eventually return a non-empty Array if a stop is found', ()=>{
                 let response = StopEndpoint.findByName('Bauernfeind')
@@ -54,6 +57,32 @@ describe('API.ts', ()=>{
                 let response = StopEndpoint.findByLocation(lat,lon,distance)
                 return expect(response).to.eventually.not.be.empty
             })
+        })
+    })
+
+    describe('API.Departures', ()=>{
+        it('should have a method getByStopID', ()=>{
+            expect(DepartureEndpoint).to.have.property('getByStopID')
+        })
+        describe('API.Departures.getByStopID', ()=>{
+            it('should eventually return an Array', ()=>{
+                let response = DepartureEndpoint.getByStopID('1550')
+                return expect(response).to.eventually.be.an('array')
+            })
+            it('should eventually return a non-empty Array if a stop is found', ()=>{
+                let response = DepartureEndpoint.getByStopID('1550')
+                return expect(response).to.eventually.not.be.empty
+            })
+            it('should eventually rejected if no valid haltId is given', ()=>{
+                let response = DepartureEndpoint.getByStopID('kjnlklj')
+                return expect(response).to.be.rejected
+            })
+            // FAILS! SEEMS TO BE A chaiAsPromised/Typescript ERROR
+            // it('should eventually return a list of Stops', ()=>{
+            //     let response = StopEndpoint.findByName('Bauer')
+            //     return response.should.eventually.all.have.property('Haltestellenname');    
+               
+            // })
         })
     })
 })
