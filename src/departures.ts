@@ -18,22 +18,23 @@ export class Departure {
     Haltepunkt: string
     Richtung: string
     Richtungstext: string
-    AbfahrtszeitSoll: string
-    AbfahrtszeitIst: string
+    AbfahrtszeitSoll: Date
+    AbfahrtszeitIst: Date
     Produkt: string
     Longitude: number
     Latitude: number
     Fahrtnummer: number
     Fahrtartnummer: number
     Prognose: boolean
+    private delayInMs : number
   
     constructor(
         Linienname: string,
         Haltepunkt: string,
         Richtung: string,
         Richtungstext: string,
-        AbfahrtszeitSoll: string,
-        AbfahrtszeitIst: string,
+        AbfahrtszeitSoll: Date,
+        AbfahrtszeitIst: Date,
         Produkt: string,
         Longitude: number,
         Latitude: number,
@@ -53,11 +54,16 @@ export class Departure {
         this.Fahrtnummer = Fahrtnummer
         this.Fahrtartnummer = Fahrtartnummer
         this.Prognose = Prognose
+        this.delayInMs =  this.calcDelay()
     }
-  
-    // getName(): string {
-    //   return this.Haltestellenname;
-    // }
+    
+    calcDelay() : number {
+      return this.AbfahrtszeitIst.getTime() - this.AbfahrtszeitSoll.getTime();
+    }
+    isDelayed(secondsTolerance: number = 60){
+      if (!this.delayInMs){this.delayInMs =  this.calcDelay()}  // Workaround: If "Departure" is initialized by JSON the constructor method "this.delayInMs =  this.calcDelay()" isn't called ! 
+      return ((this.delayInMs) > (secondsTolerance * 1000))
+    }
   
     // toJSON is automatically used by JSON.stringify
     // toJSON(): DepartureJSON {
@@ -103,7 +109,7 @@ interface DepartureResponseJSON {
     Haltestellenname: string
     VAGKennung: string
     VGNKennung: string
-    Abfahrten: Departure[]
+    Abfahrten: DepartureJSON[]
     Sonderinformationen? : DepartureSonderinformationen
 }
 interface Metadata {
@@ -165,6 +171,6 @@ export class DepartureResponse {
   // reviver can be passed as the second parameter to JSON.parse
   // to automatically call Stop.fromJSON on the resulting value.
   static reviver(key: string, value: any): any {
-    return key === "" ? Departure.fromJSON(value) : value;
+    return key === "" ? DepartureResponse.fromJSON(value) : value;
   }
 }
