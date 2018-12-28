@@ -2,7 +2,7 @@ import axios, {
     AxiosRequestConfig,
     AxiosResponse
   } from 'axios';
-import {StopRequest,Stop} from './../stops'
+import {StopResponse,Stop} from './../stops'
 
 import {API} from './../api'
 
@@ -21,7 +21,7 @@ export class StopEndpoint  {
         console.log('Returning undefined')
         return undefined
       } else {
-        let haltestellenRequest = StopRequest.fromJSON(response.data)
+        let haltestellenRequest = StopResponse.fromJSON(response.data)
         let haltestellen = haltestellenRequest.Haltestellen
         return haltestellen
       }

@@ -7,6 +7,7 @@ chai.should();
 
 import {API} from './../src/api'
 import {DepartureEndpoint} from '../src/api/departureEndpoint';
+import {DepartureResponse} from '../src/departures' 
 import {StopEndpoint} from '../src/api/stopsEndpoint';
 
 describe('API.ts', ()=>{
@@ -65,13 +66,13 @@ describe('API.ts', ()=>{
             expect(DepartureEndpoint).to.have.property('getByStopID')
         })
         describe('API.Departures.getByStopID', ()=>{
-            it('should eventually return an Array', ()=>{
+            it('should eventually return an DepartureResponse', ()=>{
                 let response = DepartureEndpoint.getByStopID('1550')
-                return expect(response).to.eventually.be.an('array')
+                return expect(response).to.eventually.be.instanceOf(DepartureResponse)
             })
-            it('should eventually return a non-empty Array if a stop is found', ()=>{
+            it('should eventually return a non-empty DepartureResponse.Abfahrten if a stop is found', ()=>{
                 let response = DepartureEndpoint.getByStopID('1550')
-                return expect(response).to.eventually.not.be.empty
+                return expect(response).to.eventually.have.property('Abfahrten').with.length.greaterThan(0)
             })
             it('should eventually rejected if no valid haltId is given', ()=>{
                 let response = DepartureEndpoint.getByStopID('kjnlklj')
