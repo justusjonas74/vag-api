@@ -37,14 +37,6 @@ export class Stop {
     return this.Haltestellenname;
   }
 
-  // // toJSON is automatically used by JSON.stringify
-  // toJSON(): StopJSON {
-  //   // copy all fields from `this` to an empty object and return in
-  //   return Object.assign({}, this, {
-  //     // convert fields that need converting
-  //   });
-  // }
-
   // fromJSON is used to convert an serialized version
   // of the Stop to an instance of the class
   static fromJSON(json: StopJSON|string): Stop {
