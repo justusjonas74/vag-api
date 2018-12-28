@@ -98,7 +98,7 @@ interface DepartureSonderinformationen {
     Text: string
 }
   
-interface DepartureRequestJSON {
+interface DepartureResponseJSON {
     Metadata: Metadata
     Haltestellenname: string
     VAGKennung: string
@@ -111,7 +111,7 @@ interface Metadata {
   Timestamp: string
 }
 
-export class DepartureRequest {
+export class DepartureResponse {
     Metadata: Metadata
     Haltestellenname: string
     VAGKennung: string
@@ -144,15 +144,15 @@ export class DepartureRequest {
 
   // fromJSON is used to convert an serialized version
   // of the Stop to an instance of the class
-  static fromJSON(json: DepartureRequestJSON|string): DepartureRequest {
+  static fromJSON(json: DepartureResponseJSON|string): DepartureResponse {
     if (typeof json === 'string') {
       // if it's a string, parse it first
-      return JSON.parse(json, DepartureRequest.reviver);
+      return JSON.parse(json, DepartureResponse.reviver);
     } else {
-      // create an instance of the DepartureRequest class
-      let departureRequest = Object.create(DepartureRequest.prototype);
+      // create an instance of the DepartureResponse class
+      let departureResponse = Object.create(DepartureResponse.prototype);
       // copy all the fields from the json object
-      return Object.assign(departureRequest, json, {
+      return Object.assign(departureResponse, json, {
         // convert fields that need converting
          Abfahrten: json.Abfahrten.map(h => {
              return Departure.fromJSON(h)
